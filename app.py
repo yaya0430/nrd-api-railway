@@ -8,18 +8,34 @@ CORS(app)
 
 # 加载数据
 def load_data():
+    # 获取当前文件所在的目录（即项目根目录）
     base_dir = os.path.dirname(os.path.abspath(__file__))
     
-    with open(os.path.join(base_dir, 'data', 'nodes.json'), 'r', encoding='utf-8') as f:
+    # 修改点：去掉了 'data'，直接拼接文件名
+    nodes_path = os.path.join(base_dir, 'nodes.json')
+    links_path = os.path.join(base_dir, 'links.json')
+    
+    # 打印路径用于调试（可选）
+    print(f"正在尝试读取: {nodes_path}")
+    print(f"正在尝试读取: {links_path}")
+
+    with open(nodes_path, 'r', encoding='utf-8') as f:
         nodes = json.load(f)
     
-    with open(os.path.join(base_dir, 'data', 'links.json'), 'r', encoding='utf-8') as f:
+    with open(links_path, 'r', encoding='utf-8') as f:
         links = json.load(f)
     
     return nodes, links, {n['id']: n for n in nodes}
 
-nodes, links, node_map = load_data()
-print(f"数据加载完成：{len(nodes)} 个节点，{len(links)} 条关系")
+# 初始化数据
+try:
+    nodes, links, node_map = load_data()
+    print(f"✅ 数据加载完成：{len(nodes)} 个节点，{len(links)} 条关系")
+except FileNotFoundError as e:
+    print(f"❌ 文件未找到错误: {e}")
+    print("请确保 nodes.json 和 links.json 已上传到 GitHub 仓库的根目录！")
+    # 如果文件不存在，初始化空数据防止程序直接崩溃，但接口会报错
+    nodes, links, node_map = [], [], {}
 
 def find_node(name):
     """查找节点（支持模糊匹配）"""
